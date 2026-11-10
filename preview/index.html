@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中转站 · UI 预览</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+    background: #f4f4f7;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px 16px;
+  }
+  .phone {
+    width: 390px; height: 844px; border-radius: 44px; overflow: hidden;
+    background: #fff; position: relative;
+    box-shadow: 0 24px 60px rgba(21, 24, 40, .18), 0 2px 6px rgba(21, 24, 40, .06);
+    display: flex; flex-direction: column;
+  }
+  .bg {
+    position: absolute; inset: 0 0 auto 0; height: 300px; pointer-events: none;
+    background:
+      radial-gradient(circle at 88% -4%, rgba(199, 183, 255, .42), rgba(199, 183, 255, 0) 55%),
+      radial-gradient(circle at 4% 58%, rgba(191, 216, 255, .30), rgba(191, 216, 255, 0) 50%),
+      linear-gradient(180deg, #f1edfb 0%, #f7f5fc 32%, #ffffff 68%);
+  }
+  .statusbar {
+    position: relative; height: 44px; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 26px; font-size: 13px; font-weight: 600; color: #17181a;
+  }
+  .status-right { display: flex; align-items: center; gap: 6px; }
+  .battery { width: 22px; height: 11px; border: 1.3px solid #17181a; border-radius: 3px; position: relative; }
+  .battery::after { content: ""; position: absolute; right: -3px; top: 3px; width: 2px; height: 5px; background: #17181a; border-radius: 0 1px 1px 0; }
+  .battery i { position: absolute; inset: 1.5px; width: 60%; background: #17181a; border-radius: 1px; display: block; }
+
+  .topbar { position: relative; height: 52px; display: flex; align-items: center; padding: 0 8px; }
+  .topbar .back { width: 34px; height: 34px; display: grid; place-items: center; color: #17181a; font-size: 24px; line-height: 1; }
+  .topbar .title { position: absolute; left: 0; right: 0; text-align: center; font-size: 17px; font-weight: 500; color: #17181a; pointer-events: none; }
+  .topbar .more { margin-left: auto; width: 34px; height: 34px; display: grid; place-items: center; color: #17181a; }
+
+  .scroll { flex: 1; overflow-y: auto; position: relative; padding-bottom: 96px; scrollbar-width: none; }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  .banner {
+    margin: 4px 16px 0; height: 100px; border-radius: 18px; position: relative; overflow: hidden;
+    background: linear-gradient(100deg, #e9f1ff 0%, #f5f0ff 55%, #fdf3fa 100%);
+    display: flex; align-items: center; padding-left: 20px;
+  }
+  .banner .cloud { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 132px; height: 100px; }
+  .banner .txt { position: relative; z-index: 2; }
+  .banner .l1 { display: flex; align-items: flex-end; gap: 6px; }
+  .banner .brand { font-size: 23px; font-weight: 800; font-style: italic; letter-spacing: -.4px; color: #3b7de0; }
+  .banner .brand2 { font-size: 17px; font-weight: 600; color: #17181a; padding-bottom: 3px; }
+  .banner .sub { margin-top: 7px; font-size: 11px; color: #9aa0a6; }
+
+  .sec { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 24px 0 12px; }
+  .sec span { font-size: 12px; color: #9aa0a6; letter-spacing: 1px; }
+  .sec i { display: block; width: 26px; height: 1px; }
+  .sec i.l { background: linear-gradient(90deg, rgba(216,216,222,0), #d8d8de); }
+  .sec i.r { background: linear-gradient(90deg, #d8d8de, rgba(216,216,222,0)); }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; }
+  .card {
+    height: 88px; background: #fff; border-radius: 16px; border: .5px solid rgba(0,0,0,.05);
+    box-shadow: 0 6px 16px rgba(23, 24, 26, .06);
+    display: flex; align-items: center; padding: 0 14px 0 16px; cursor: pointer;
+    transition: transform .14s ease, box-shadow .14s ease;
+  }
+  .card:active { transform: scale(.975); box-shadow: 0 3px 10px rgba(23,24,26,.08); }
+  .card .name { font-size: 17px; font-weight: 600; color: #17181a; }
+  .card .desc { margin-top: 5px; font-size: 11px; color: #9aa0a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .txt { flex: 1; min-width: 0; }
+  .ico {
+    width: 42px; height: 42px; border-radius: 13px; background: #f5f6f8; margin-left: 6px;
+    display: grid; place-items: center; color: #3a3d42; flex: 0 0 auto;
+  }
+  .ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 16px; }
+  .mini {
+    height: 78px; background: #fff; border-radius: 14px; box-shadow: 0 5px 14px rgba(23,24,26,.055);
+    padding: 13px 12px; cursor: pointer; transition: transform .14s ease;
+  }
+  .mini:active { transform: scale(.97); }
+  .mini .name { font-size: 15px; font-weight: 600; color: #17181a; }
+  .mini .desc { margin-top: 4px; font-size: 10px; line-height: 13px; color: #9aa0a6; }
+
+  .recent {
+    position: absolute; left: 12px; right: 12px; bottom: 22px; height: 66px;
+    background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(23, 24, 26, .14);
+    display: flex; align-items: center; padding: 0 10px;
+  }
+  .recent .cover {
+    width: 44px; height: 44px; border-radius: 13px; flex: 0 0 auto;
+    background: linear-gradient(140deg, #b9c8e8, #8ca4ce); display: grid; place-items: center; color: #fff;
+  }
+  .recent .cover svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
+  .recent .info { flex: 1; min-width: 0; padding-left: 10px; }
+  .recent .t1 { font-size: 14px; font-weight: 500; color: #17181a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .recent .t2 { margin-top: 2px; font-size: 11px; color: #9aa0a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .recent .go { width: 40px; display: grid; place-items: center; color: #17181a; }
+  .recent .go svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .homebar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; border-radius: 3px; background: #17181a; opacity: .85; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="bg"></div>
+
+  <div class="statusbar">
+    <div>11:39</div>
+    <div class="status-right">
+      <svg width="17" height="12" viewBox="0 0 17 12" aria-hidden="true"><path d="M1 9v2M5 6.5v4.5M9 4v7M13 1.5v9.5" stroke="#17181a" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span style="font-size:11px;font-weight:600">4G</span>
+      <span class="battery"><i></i></span>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <div class="back">‹</div>
+    <div class="title">中转站</div>
+    <div class="more">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#17181a"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="banner">
+      <svg class="cloud" viewBox="0 0 132 100" aria-hidden="true">
+        <defs>
+          <radialGradient id="g1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#b9d4ff" stop-opacity=".55"/>
+            <stop offset="100%" stop-color="#b9d4ff" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="72" cy="52" rx="54" ry="34" fill="url(#g1)"/>
+        <circle cx="58" cy="63" r="19" fill="#fff" fill-opacity=".82"/>
+        <circle cx="80" cy="55" r="24" fill="#fff" fill-opacity=".9"/>
+        <circle cx="96" cy="66" r="15" fill="#fff" fill-opacity=".82"/>
+        <rect x="47" y="62" width="58" height="18" rx="9" fill="#fff" fill-opacity=".82"/>
+        <circle cx="36" cy="40" r="4.5" fill="#a9c8ff" fill-opacity=".45"/>
+        <circle cx="105" cy="36" r="3" fill="#a9c8ff" fill-opacity=".4"/>
+      </svg>
+      <div class="txt">
+        <div class="l1"><span class="brand">中转</span><span class="brand2">直达站</span></div>
+        <div class="sub">点一下，去你想去的地方</div>
+      </div>
+    </div>
+
+    <div class="sec"><i class="l"></i><span>特色推荐</span><i class="r"></i></div>
+    <div class="grid" id="grid"></div>
+
+    <div class="sec"><i class="l"></i><span>其他</span><i class="r"></i></div>
+    <div class="row3" id="row3"></div>
+  </div>
+
+  <div class="recent">
+    <div class="cover">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg>
+    </div>
+    <div class="info">
+      <div class="t1" id="recentTitle">还没有访问记录</div>
+      <div class="t2" id="recentHost">点上面的卡片开始</div>
+    </div>
+    <div class="go">
+      <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    </div>
+  </div>
+
+  <div class="homebar"></div>
+</div>
+
+<script>
+const icon = {
+  car: '<path d="M4 15h16M5.5 15l1.2-4.4A2 2 0 0 1 8.6 9h6.8a2 2 0 0 1 1.9 1.6L18.5 15"/><path d="M4 15v3.2M20 15v3.2"/><circle cx="7.5" cy="18.2" r="1.4"/><circle cx="16.5" cy="18.2" r="1.4"/>',
+  mood: '<circle cx="12" cy="12" r="8.5"/><circle cx="9.2" cy="10.4" r=".9" fill="currentColor" stroke="none"/><circle cx="14.8" cy="10.4" r=".9" fill="currentColor" stroke="none"/><path d="M8.8 14.2a4 4 0 0 0 6.4 0"/>',
+  sleep: '<path d="M20 14.2A8 8 0 0 1 9.8 4a8.6 8.6 0 1 0 10.2 10.2z"/>',
+  sport: '<circle cx="14.5" cy="5.2" r="1.9"/><path d="M13 9l-2.6 3.4 2.4 2.1.8 5M13 9l3 1.6 2 3.4M10.4 12.4L7 13.6l-1.6 4M13.6 14.4L10 16.6"/>',
+  study: '<path d="M12 7.2C10.4 6 8.2 5.5 5 5.6v11c3.2-.1 5.4.4 7 1.6 1.6-1.2 3.8-1.7 7-1.6v-11c-3.2-.1-5.4.4-7 1.6z"/><path d="M12 7.2v11"/>',
+  shop: '<path d="M4.5 9.5V19h15V9.5"/><path d="M3.4 9.5l1.5-4h14.2l1.5 4a2.6 2.6 0 0 1-4.8 1 2.6 2.6 0 0 1-4.8 0 2.6 2.6 0 0 1-4.8 0 2.6 2.6 0 0 1-2.8-1z"/><path d="M10 19v-4h4v4"/>',
+  game: '<rect x="2.8" y="7.6" width="18.4" height="9.2" rx="4.6"/><path d="M7 10.6v3M5.5 12.1h3M15.4 11.4h.01M17.6 13.2h.01"/>',
+  dance: '<path d="M9 18.2a2.4 2.4 0 1 0 0-4.8 2.4 2.4 0 0 0 0 4.8z"/><path d="M11.4 15.8V6.4l7.2-1.6v8.2"/><path d="M16.2 15a2.4 2.4 0 1 0 0-4.8 2.4 2.4 0 0 0 0 4.8z"/>',
+  heal: '<path d="M12 20c0-4.4 2.6-8 6.4-8.6C18 15.6 15.6 19.2 12 20z"/><path d="M12 20c0-4.4-2.6-8-6.4-8.6C6 15.6 8.4 19.2 12 20z"/><path d="M12 20V9.4"/>',
+  wedding: '<path d="M5 20v-5.2h14V20"/><path d="M4 14.8h16v-1.4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v1.4z"/><path d="M12 11.4V7"/><circle cx="12" cy="5.2" r="1.4"/>',
+  baby: '<circle cx="12" cy="13" r="7"/><circle cx="9.6" cy="11.6" r=".9" fill="currentColor" stroke="none"/><circle cx="14.4" cy="11.6" r=".9" fill="currentColor" stroke="none"/><path d="M9.8 15.4a3.2 3.2 0 0 0 4.4 0"/><path d="M12 6a2.2 2.2 0 0 1 1.4 3.9"/>',
+  web: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.5 2.4 14.5 0 17M12 3.5c-2.4 2.5-2.4 14.5 0 17"/>'
+};
+
+const featured = [
+  { id:'car',    name:'车载',     desc:'音乐 / 电台 / 导航', icon:'car',   url:'https://music.163.com/' },
+  { id:'mood',   name:'心情',     desc:'开心 / 难过 / 治愈', icon:'mood',  url:'https://www.douban.com/' },
+  { id:'sleep',  name:'睡眠',     desc:'白噪音 / 助眠 / 轻音', icon:'sleep', url:'https://asoftmurmur.com/' },
+  { id:'sport',  name:'运动',     desc:'跟练 / 拉伸 / 跳操', icon:'sport', url:'https://www.bilibili.com/' },
+  { id:'study',  name:'工作学习', desc:'专注 / 查资料 / 长文', icon:'study', url:'https://www.zhihu.com/' },
+  { id:'shop',   name:'店铺',     desc:'网店 / 后台 / 数据',  icon:'shop',  url:'https://www.taobao.com/' },
+  { id:'game',   name:'玩游戏',   desc:'小游戏 / 攻略 / 音效', icon:'game',  url:'https://www.4399.com/' },
+  { id:'dance',  name:'广场舞',   desc:'热门 / 跟跳 / 教学',  icon:'dance', url:'https://www.douyin.com/' }
+];
+
+const others = [
+  { id:'heal',    name:'疗愈', desc:'音频 / 电台',  icon:'heal',    url:'https://www.ximalaya.com/' },
+  { id:'wedding', name:'婚礼', desc:'灵感 / 参考',  icon:'wedding', url:'https://www.xiaohongshu.com/' },
+  { id:'baby',    name:'母婴', desc:'育儿 / 知识',  icon:'baby',    url:'https://www.ci123.com/' }
+];
+
+function svg(k) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (icon[k] || icon.web) + '</svg>'; }
+
+function bind(el, item) {
+  el.addEventListener('click', () => {
+    document.getElementById('recentTitle').textContent = item.name;
+    document.getElementById('recentHost').textContent = new URL(item.url).host.replace(/^www\./, '');
+    window.open(item.url, '_blank', 'noopener');
+  });
+}
+
+const grid = document.getElementById('grid');
+featured.forEach(it => {
+  const d = document.createElement('div');
+  d.className = 'card';
+  d.innerHTML = '<div class="txt"><div class="name">' + it.name + '</div><div class="desc">' + it.desc + '</div></div><div class="ico">' + svg(it.icon) + '</div>';
+  bind(d, it);
+  grid.appendChild(d);
+});
+
+const row3 = document.getElementById('row3');
+others.forEach(it => {
+  const d = document.createElement('div');
+  d.className = 'mini';
+  d.innerHTML = '<div class="name">' + it.name + '</div><div class="desc">' + it.desc + '</div>';
+  bind(d, it);
+  row3.appendChild(d);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+{
+  "_说明": "改这个文件即可增删入口，不用改代码。icon 可选值：car/mood/sleep/sport/study/shop/game/dance/heal/wedding/baby/web",
+  "appName": "中转站",
+  "banner": {
+    "title": "B260608",
+    "accent": "智能体直达站",
+    "subtitle": "探索AI世界",
+    "url": ""
+  },
+  "sections": [
+    {
+      "title": "特色推荐",
+      "style": "grid",
+      "items": [
+        {
+          "id": "agent-1",
+          "title": "智能体导航门户",
+          "subtitle": "",
+          "icon": "car",
+          "url": "https://comate.wpsgo.com/s/mVJ7J8UuzHx2/?"
+        },
+        {
+          "id": "agent-2",
+          "title": "摄影展示",
+          "subtitle": "校园摄影作品展示",
+          "icon": "mood",
+          "url": "https://comate.wpsgo.com/s/KmdJnI35EU2T/?"
+        },
+        {
+          "id": "agent-3",
+          "title": "百事通",
+          "subtitle": "南邮校园生活智能问答助手",
+          "icon": "sleep",
+          "url": "https://comate.wpsgo.com/s/QVXRFGMPhpl6/?"
+        },
+        {
+          "id": "agent-4",
+          "title": "考勤助手",
+          "subtitle": "晚自习智能考勤",
+          "icon": "sport",
+          "url": "https://comate.wpsgo.com/s/aBtvyx15sO5E/?"
+        },
+        {
+          "id": "agent-5",
+          "title": "个人信息",
+          "subtitle": "个人信息中心",
+          "icon": "study",
+          "url": "https://comate.wpsgo.com/s/mVJ7J8UuzHx2/profile.html"
+        },
+        {
+          "id": "agent-6",
+          "title": "校园论坛",
+          "subtitle": "免密登录暂未开通",
+          "icon": "shop",
+          "url": "https://124.156.164.21.sslip.io/"
+        },
+        {
+          "id": "agent-7",
+          "title": "学搭子",
+          "subtitle": "班级资料与作业事务",
+          "icon": "game",
+          "url": "https://124.156.164.21:8080/"
+        },
+        {
+          "id": "agent-8",
+          "title": "四六级",
+          "subtitle": "四六级学习智能体",
+          "icon": "dance",
+          "url": "https://www.modelscope.cn/studios/xingran110/cet-agent?mode=full"
+        }
+      ]
+    },
+    {
+      "title": "其他",
+      "style": "compact",
+      "items": [
+        {
+          "id": "heal",
+          "title": "",
+          "subtitle": "",
+          "icon": "",
+          "url": ""
+        },
+        {
+          "id": "wedding",
+          "title": "",
+          "subtitle": "",
+          "icon": "",
+          "url": ""
+        },
+        {
+          "id": "baby",
+          "title": "",
+          "subtitle": "",
+          "icon": "",
+          "url": ""
+        }
+      ]
+    }
+  ]
+}
