@@ -56,7 +56,8 @@ zhongzhuanzhan/
 ```
 
 - `style: "grid"` → 两列大卡片；`style: "compact"` → 三列小卡片（可以再加 section，会一直往下排）
-- `icon` 可选值：`car` `mood` `sleep` `sport` `study` `shop` `game` `dance` `heal` `wedding` `baby` `web`
+- `icon` 可选值：`portal`（罗盘）`camera`（相机）`bulb`（灯泡）`calendar`（日历勾）`person`（人像）`forum`（对话）`book`（书本）`graduation`（学士帽）`celebration`（庆祝）`web`（地球）
+  旧场景图标仍兼容：`car` `mood` `sleep` `sport` `study` `shop` `game` `dance` `heal` `wedding` `baby`
 - `banner.url` 留空 → 横幅不可点；填了就在应用内打开
 - 首页右上角「⋮ → 重新载入配置」可以直接热重载，不必重装
 
