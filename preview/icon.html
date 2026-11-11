@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>启动图标预览</title>
+<style>
+  body {
+    margin: 0; padding: 40px; background: #1b1c1f; color: #e8e8ea;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 28px;
+  }
+  h1 { font-size: 16px; font-weight: 500; margin: 0; color: #b9bcc4; letter-spacing: 1px; }
+  .row { display: flex; gap: 44px; align-items: flex-start; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .frame { width: 132px; height: 132px; position: relative; overflow: hidden; }
+  .frame img { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .sq { border-radius: 22px; }
+  .circle { border-radius: 50%; }
+  .squircle { border-radius: 34px; }
+  .mask-test { width: 132px; height: 132px; border-radius: 50%; overflow: hidden; position: relative; }
+  .mask-test img { width: 100%; height: 100%; object-fit: cover; }
+  .label { font-size: 12px; color: #8b8f98; }
+  .home { display: flex; gap: 26px; align-items: center; background: #24262b; padding: 22px 26px; border-radius: 20px; }
+  .home .app { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .home .app img { width: 60px; height: 60px; border-radius: 15px; display: block; }
+  .home .app span { font-size: 11px; color: #c9ccd3; }
+  .home .app.dim img { opacity: .35; }
+  .home .app.dim span { color: #6b6f77; }
+</style>
+</head>
+<body>
+  <h1>启动图标在不同遮罩下的效果</h1>
+  <div class="row">
+    <div class="item"><div class="frame sq"><img src="../app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt=""></div><div class="label">方形（部分启动器）</div></div>
+    <div class="item"><div class="frame squircle"><img src="../app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt=""></div><div class="label">圆角方形（原生）</div></div>
+    <div class="item"><div class="mask-test"><img src="../app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt=""></div><div class="label">圆形（EMUI/OneUI）</div></div>
+  </div>
+  <h1>放在桌面上的样子</h1>
+  <div class="home">
+    <div class="app dim"><img src="../app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt=""><span>相机</span></div>
+    <div class="app"><img src="../app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt=""><span>中转站</span></div>
+    <div class="app dim"><img src="../app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt=""><span>设置</span></div>
+  </div>
+</body>
+</html>
