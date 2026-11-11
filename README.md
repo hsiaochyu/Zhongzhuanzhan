@@ -70,6 +70,27 @@ zhongzhuanzhan/
 # 产物：app/build/outputs/apk/debug/app-debug.apk
 ```
 
+### 签名 release 包
+
+release 包用 `keystore/zhongzhuanzhan.jks` 签名，签名信息写在项目根目录的 `keystore.properties`（两者都在 `.gitignore` 里，不会进仓库）：
+
+```properties
+storeFile=keystore/zhongzhuanzhan.jks
+storePassword=******
+keyAlias=zhongzhuanzhan
+keyPassword=******
+```
+
+```bash
+./gradlew assembleRelease
+# 产物：app/build/outputs/apk/release/app-release.apk
+```
+
+⚠️ **这个 jks 是唯一一份，丢了就无法再覆盖升级**（只能用新密钥重装）。务必把 `keystore/` 目录和 `keystore.properties` 备份到网盘/密码管理器。
+换机器协作时，把这两个东西单独传给对方，不要提交到 git。
+
+> 没配置 keystore 时，`assembleRelease` 会产出未签名包（安装会失败），gradle 脚本会自动跳过签名配置。
+
 需要 `local.properties` 指向本机 SDK：
 
 ```properties
