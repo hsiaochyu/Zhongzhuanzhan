@@ -62,9 +62,12 @@ import com.zhongzhuanzhan.app.data.RecentStore
 fun HomeScreen(
     config: AppConfig,
     recent: Pair<String, String>?,
+    account: com.zhongzhuanzhan.app.data.WpsAccountState,
     onOpenUrl: (title: String, url: String) -> Unit,
     onReopen: () -> Unit,
     onReload: () -> Unit,
+    onCheckAccount: () -> Unit,
+    onClearWebLogin: () -> Unit,
 ) {
     var tab by rememberSaveable { mutableStateOf(0) }
 
@@ -97,7 +100,12 @@ fun HomeScreen(
                         onOpenUrl = onOpenUrl,
                         onReopen = onReopen,
                     )
-                    else -> MeScreen(onReload = onReload)
+                    else -> MeScreen(
+                        onReload = onReload,
+                        account = account,
+                        onCheckAccount = onCheckAccount,
+                        onClearWebLogin = onClearWebLogin,
+                    )
                 }
             }
         }

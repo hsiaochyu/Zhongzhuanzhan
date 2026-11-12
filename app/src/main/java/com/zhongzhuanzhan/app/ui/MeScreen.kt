@@ -20,14 +20,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Tag
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,13 +43,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zhongzhuanzhan.app.data.WpsAccountState
+import com.zhongzhuanzhan.app.data.WpsAccountStatus
 
 // 与 build.gradle.kts 的 versionName 保持一致（改版本时两处都要动）
-private const val APP_VERSION = "1.2-beta1"
+private const val APP_VERSION = "1.2-beta2"
 
 @Composable
-fun MeScreen(onReload: () -> Unit) {
+fun MeScreen(
+    onReload: () -> Unit,
+    account: WpsAccountState,
+    onCheckAccount: () -> Unit,
+    onClearWebLogin: () -> Unit,
+) {
     var showAbout by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) { onCheckAccount() }
 
     LazyColumn(
         modifier = Modifier
@@ -66,7 +77,11 @@ fun MeScreen(onReload: () -> Unit) {
         }
 
         item(key = "account") {
-            AccountCard()
+            AccountCard(
+                account = account,
+                onCheck = onCheckAccount,
+                onClear = onClearWebLogin,
+            )
         }
 
         item(key = "settings") {
@@ -87,8 +102,14 @@ fun MeScreen(onReload: () -> Unit) {
 }
 
 @Composable
-private fun AccountCard() {
+private fun AccountCard(
+    account: WpsAccountState,
+    onCheck: () -> Unit,
+    onClear: () -> Unit,
+) {
+    var confirmClear by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(18.dp)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,7 +118,7 @@ private fun AccountCard() {
             .shadow(10.dp, shape, ambientColor = Color(0x14000000), spotColor = Color(0x14000000))
             .clip(shape)
             .background(Color.White)
-            .padding(horizontal = 18.dp, vertical = 18.dp),
+            .padding(horizontal = 18.dp, vertical = 16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -108,7 +129,11 @@ private fun AccountCard() {
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Lock,
+                    imageVector = if (account.status == WpsAccountStatus.LOGGED_IN) {
+                        Icons.Filled.Person
+                    } else {
+                        Icons.Filled.Lock
+                    },
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(22.dp),
@@ -119,20 +144,58 @@ private fun AccountCard() {
 
             Column {
                 Text(
-                    text = "登录状态",
+                    text = "WPS 账户",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Ink,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "暂未做好 · 一次登录全站通行已在路上",
+                    text = accountStatusText(account),
                     fontSize = 12.sp,
                     color = SubInk,
                 )
             }
         }
+
+        Row(modifier = Modifier.padding(top = 4.dp)) {
+            TextButton(onClick = onCheck) {
+                Text("重新检测", fontSize = 12.sp)
+            }
+            TextButton(onClick = { confirmClear = true }) {
+                Text("清除网页登录数据", fontSize = 12.sp, color = Color(0xFFB0543F))
+            }
+        }
     }
+
+    if (confirmClear) {
+        AlertDialog(
+            onDismissRequest = { confirmClear = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmClear = false
+                    onClear()
+                }) { Text("清除") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmClear = false }) { Text("取消") }
+            },
+            title = { Text("清除网页登录数据？") },
+            text = {
+                Text(
+                    "会退出 WPS 登录，并清掉各入口已记住的密码状态（含论坛等其它网页的登录数据）。之后打开任意入口重新登录一次即可恢复。"
+                )
+            },
+        )
+    }
+}
+
+private fun accountStatusText(account: WpsAccountState): String = when (account.status) {
+    WpsAccountStatus.IDLE, WpsAccountStatus.CHECKING -> "检测中…"
+    WpsAccountStatus.LOGGED_IN ->
+        account.displayName?.let { "已登录 · $it" } ?: "已登录 · 重启 App 仍在线"
+    WpsAccountStatus.LOGGED_OUT -> "未登录 · 打开任意入口登录一次即可"
+    WpsAccountStatus.TIMEOUT -> "检测超时 · 点「重新检测」试试"
 }
 
 @Composable
