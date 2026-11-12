@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -23,20 +24,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Public
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,10 +64,9 @@ fun HomeScreen(
     recent: Pair<String, String>?,
     onOpenUrl: (title: String, url: String) -> Unit,
     onReopen: () -> Unit,
-    onExit: () -> Unit,
     onReload: () -> Unit,
 ) {
-    var showAbout by remember { mutableStateOf(false) }
+    var tab by rememberSaveable { mutableStateOf(0) }
 
     Box(
         modifier = Modifier
@@ -79,23 +79,116 @@ fun HomeScreen(
                 )
             )
     ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            bottomBar = {
+                BottomNavBar(selected = tab, onSelect = { tab = it })
+            },
+        ) { padding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                when (tab) {
+                    0 -> HomeTab(
+                        config = config,
+                        recent = recent,
+                        onOpenUrl = onOpenUrl,
+                        onReopen = onReopen,
+                    )
+                    else -> MeScreen(onReload = onReload)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomNavBar(selected: Int, onSelect: (Int) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.5.dp)
+                .background(Divider)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .height(56.dp)
+        ) {
+            NavItem(
+                label = "主页",
+                icon = if (selected == 0) Icons.Filled.Home else Icons.Outlined.Home,
+                selected = selected == 0,
+                onClick = { onSelect(0) },
+                modifier = Modifier.weight(1f),
+            )
+            NavItem(
+                label = "我的",
+                icon = if (selected == 1) Icons.Filled.Person else Icons.Outlined.Person,
+                selected = selected == 1,
+                onClick = { onSelect(1) },
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun NavItem(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = if (selected) Accent else SubInk,
+            modifier = Modifier.size(24.dp),
+        )
+        Spacer(Modifier.height(3.dp))
+        Text(
+            text = label,
+            fontSize = 10.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (selected) Accent else SubInk,
+        )
+    }
+}
+
+@Composable
+private fun HomeTab(
+    config: AppConfig,
+    recent: Pair<String, String>?,
+    onOpenUrl: (title: String, url: String) -> Unit,
+    onReopen: () -> Unit,
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
         GlowBackdrop()
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding(),
+                .statusBarsPadding()
+                .padding(top = 6.dp),
             contentPadding = PaddingValues(bottom = 106.dp),
         ) {
-            item(key = "topbar") {
-                HomeTopBar(
-                    title = config.appName,
-                    onExit = onExit,
-                    onReload = onReload,
-                    onAbout = { showAbout = true },
-                )
-            }
-
             item(key = "banner") {
                 BannerCard(
                     banner = config.banner,
@@ -134,16 +227,11 @@ fun HomeScreen(
         RecentBar(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 8.dp),
             recent = recent,
             onReopen = onReopen,
         )
-    }
-
-    if (showAbout) {
-        AboutDialog(onDismiss = { showAbout = false })
     }
 }
 
@@ -164,74 +252,6 @@ private fun GlowBackdrop() {
             radius = size.width * 0.5f,
             center = Offset(size.width * 0.02f, size.height * 0.6f),
         )
-    }
-}
-
-@Composable
-private fun HomeTopBar(
-    title: String,
-    onExit: () -> Unit,
-    onReload: () -> Unit,
-    onAbout: () -> Unit,
-) {
-    var menuOpen by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-    ) {
-        IconButton(
-            onClick = onExit,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 4.dp),
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "返回",
-                tint = Ink,
-                modifier = Modifier.size(28.dp),
-            )
-        }
-
-        Text(
-            text = title,
-            modifier = Modifier.align(Alignment.Center),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
-            color = Ink,
-        )
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 4.dp)
-        ) {
-            IconButton(onClick = { menuOpen = true }) {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = "菜单",
-                    tint = Ink,
-                )
-            }
-            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                DropdownMenuItem(
-                    text = { Text("重新载入配置") },
-                    onClick = {
-                        menuOpen = false
-                        onReload()
-                    },
-                )
-                DropdownMenuItem(
-                    text = { Text("关于") },
-                    onClick = {
-                        menuOpen = false
-                        onAbout()
-                    },
-                )
-            }
-        }
     }
 }
 
@@ -544,22 +564,4 @@ private fun RecentBar(
             )
         }
     }
-}
-
-@Composable
-private fun AboutDialog(onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("知道了") }
-        },
-        title = { Text("关于中转站") },
-        text = {
-            Text(
-                "把常用网页收进一屏的入口站。\n\n" +
-                    "链接配置：assets/links.json\n" +
-                    "改完重新打包即可，不需要改代码。"
-            )
-        },
-    )
 }

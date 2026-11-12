@@ -34,7 +34,6 @@ class MainActivity : ComponentActivity() {
                     onReopen = {
                         recentState.value?.let { WebActivity.start(this, it.first, it.second) }
                     },
-                    onExit = { finish() },
                     onReload = { recreate() },
                 )
             }
