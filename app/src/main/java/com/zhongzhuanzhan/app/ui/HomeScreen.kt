@@ -68,6 +68,7 @@ fun HomeScreen(
     onReload: () -> Unit,
     onCheckAccount: () -> Unit,
     onClearWebLogin: () -> Unit,
+    onLoginWps: () -> Unit,
 ) {
     var tab by rememberSaveable { mutableStateOf(0) }
 
@@ -105,6 +106,7 @@ fun HomeScreen(
                         account = account,
                         onCheckAccount = onCheckAccount,
                         onClearWebLogin = onClearWebLogin,
+                        onLoginWps = onLoginWps,
                     )
                 }
             }

@@ -107,7 +107,8 @@ class WpsAccountProbe(private val context: Context) {
             // evaluateJavascript 返回的是 JSON 编码过的字符串，先解开一层
             val decoded = JSONObject("{\"r\":$raw}").optString("r")
             val obj = JSONObject(decoded)
-            WpsAccountState(WpsAccountStatus.LOGGED_IN, displayName = findName(obj.optJSONObject("ls")))
+            val name = findName(obj.optJSONObject("ls")) ?: obj.optString("domName").takeIf { it.isNotBlank() }
+            WpsAccountState(WpsAccountStatus.LOGGED_IN, displayName = name)
         } catch (_: Exception) {
             fallback
         }
@@ -142,7 +143,9 @@ class WpsAccountProbe(private val context: Context) {
     private fun cleanName(s: String): String = s.trim().take(24)
 
     companion object {
-        private const val PROBE_URL = "https://comate.wpsgo.com/s/mVJ7J8UuzHx2/?"
+        /** share 链接：未登录时跳这里完成 WPS 登录（登录态全 App 共享） */
+        const val LOGIN_URL = "https://comate.wpsgo.com/s/mVJ7J8UuzHx2/?"
+        private const val PROBE_URL = LOGIN_URL
 
         private val PROBE_JS = """
             (function(){
@@ -156,7 +159,16 @@ class WpsAccountProbe(private val context: Context) {
                         }
                     }
                 } catch (e) {}
-                return JSON.stringify({ cookieLen: document.cookie.length, ls: hits });
+                var domName = '';
+                try {
+                    var nodes = document.querySelectorAll(
+                        '[class*="nick"],[class*="userName"],[class*="user-name"],[class*="userNick"]');
+                    for (var j = 0; j < nodes.length && !domName; j++) {
+                        var t = (nodes[j].textContent || '').trim();
+                        if (t && t.length <= 24) domName = t;
+                    }
+                } catch (e) {}
+                return JSON.stringify({ cookieLen: document.cookie.length, ls: hits, domName: domName });
             })();
         """.trimIndent()
     }

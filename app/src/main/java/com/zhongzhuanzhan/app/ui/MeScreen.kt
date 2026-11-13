@@ -2,6 +2,8 @@ package com.zhongzhuanzhan.app.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,7 +49,7 @@ import com.zhongzhuanzhan.app.data.WpsAccountState
 import com.zhongzhuanzhan.app.data.WpsAccountStatus
 
 // 与 build.gradle.kts 的 versionName 保持一致（改版本时两处都要动）
-private const val APP_VERSION = "1.2-beta2"
+private const val APP_VERSION = "1.2-beta3"
 
 @Composable
 fun MeScreen(
@@ -55,6 +57,7 @@ fun MeScreen(
     account: WpsAccountState,
     onCheckAccount: () -> Unit,
     onClearWebLogin: () -> Unit,
+    onLoginWps: () -> Unit,
 ) {
     var showAbout by remember { mutableStateOf(false) }
 
@@ -81,6 +84,7 @@ fun MeScreen(
                 account = account,
                 onCheck = onCheckAccount,
                 onClear = onClearWebLogin,
+                onLogin = onLoginWps,
             )
         }
 
@@ -106,9 +110,11 @@ private fun AccountCard(
     account: WpsAccountState,
     onCheck: () -> Unit,
     onClear: () -> Unit,
+    onLogin: () -> Unit,
 ) {
     var confirmClear by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(18.dp)
+    val loggedIn = account.status == WpsAccountStatus.LOGGED_IN
 
     Column(
         modifier = Modifier
@@ -129,11 +135,7 @@ private fun AccountCard(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = if (account.status == WpsAccountStatus.LOGGED_IN) {
-                        Icons.Filled.Person
-                    } else {
-                        Icons.Filled.Lock
-                    },
+                    imageVector = if (loggedIn) Icons.Filled.Person else Icons.Filled.Lock,
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(22.dp),
@@ -145,20 +147,38 @@ private fun AccountCard(
             Column {
                 Text(
                     text = "WPS 账户",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Ink,
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = accountStatusText(account),
-                    fontSize = 12.sp,
+                    fontSize = 11.sp,
                     color = SubInk,
                 )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    text = accountMainText(account),
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (loggedIn) Ink else SubInk,
+                )
+                if (loggedIn) {
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = "已登录 · 重启 App 仍在线",
+                        fontSize = 11.sp,
+                        color = SubInk,
+                    )
+                }
             }
         }
 
-        Row(modifier = Modifier.padding(top = 4.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            if (!loggedIn && account.status == WpsAccountStatus.LOGGED_OUT) {
+                TextButton(onClick = onLogin) {
+                    Text("登录 WPS 账号", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
             TextButton(onClick = onCheck) {
                 Text("重新检测", fontSize = 12.sp)
             }
@@ -190,12 +210,11 @@ private fun AccountCard(
     }
 }
 
-private fun accountStatusText(account: WpsAccountState): String = when (account.status) {
+private fun accountMainText(account: WpsAccountState): String = when (account.status) {
     WpsAccountStatus.IDLE, WpsAccountStatus.CHECKING -> "检测中…"
-    WpsAccountStatus.LOGGED_IN ->
-        account.displayName?.let { "已登录 · $it" } ?: "已登录 · 重启 App 仍在线"
-    WpsAccountStatus.LOGGED_OUT -> "未登录 · 打开任意入口登录一次即可"
-    WpsAccountStatus.TIMEOUT -> "检测超时 · 点「重新检测」试试"
+    WpsAccountStatus.LOGGED_IN -> account.displayName ?: "已登录"
+    WpsAccountStatus.LOGGED_OUT -> "未登录"
+    WpsAccountStatus.TIMEOUT -> "检测超时"
 }
 
 @Composable
@@ -218,8 +237,8 @@ private fun SettingsCard(onReload: () -> Unit, onAbout: () -> Unit) {
         )
         SettingRow(
             icon = Icons.Filled.Info,
-            title = "关于中转站",
-            subtitle = "链接配置与打包说明",
+            title = "关于「探索 AI 世界」",
+            subtitle = "这个 App 是干嘛的",
             onClick = onAbout,
             showDivider = false,
         )
@@ -350,13 +369,48 @@ private fun AboutDialog(onDismiss: () -> Unit) {
         confirmButton = {
             TextButton(onClick = onDismiss) { Text("知道了") }
         },
-        title = { Text("关于中转站") },
+        title = { Text("B260608 站 · 探索 AI 世界") },
         text = {
-            Text(
-                "把常用网页收进一屏的入口站。\n\n" +
-                    "链接配置：assets/links.json\n" +
-                    "改完重新打包即可，不需要改代码。"
-            )
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            ) {
+                AboutSection(
+                    "为什么要做这个 App",
+                    "前些天我们用 AI 搭了一批应用，可惜它们都住在聊天记录里——消息一刷，" +
+                        "链接就被顶上去再也找不到了（校园论坛一直没人讨论，多半也是这个原因）。\n\n" +
+                        "与其在群里考古，不如把它们装进一个 App，点一下即达。",
+                )
+                AboutSection(
+                    "里面有什么",
+                    "我们班用智能体搭建的各类网站，一站式直达：学搭子、活动管家、考勤助手、" +
+                        "百事通、四六级、摄影展示、个人信息中心……不用记链接，不用翻聊天记录。\n\n" +
+                        "App 本体：Kotlin + Jetpack Compose，Android 8.0 及以上可装。",
+                )
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = "~~那这个 App 是怎么打的包？当然也是用 WPS AI 😂~~",
+                    fontSize = 12.sp,
+                    color = SubInk,
+                )
+            }
         },
     )
+}
+
+@Composable
+private fun AboutSection(title: String, body: String) {
+    Text(
+        text = title,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Ink,
+    )
+    Spacer(Modifier.height(4.dp))
+    Text(
+        text = body,
+        fontSize = 12.sp,
+        lineHeight = 18.sp,
+        color = SubInk,
+    )
+    Spacer(Modifier.height(12.dp))
 }

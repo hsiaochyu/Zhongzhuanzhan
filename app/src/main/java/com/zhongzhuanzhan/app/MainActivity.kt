@@ -45,6 +45,9 @@ class MainActivity : ComponentActivity() {
                     onReload = { recreate() },
                     onCheckAccount = { checkWpsAccount() },
                     onClearWebLogin = { clearWebLogin() },
+                    onLoginWps = {
+                        WebActivity.start(this, "WPS 登录", WpsAccountProbe.LOGIN_URL)
+                    },
                 )
             }
         }
@@ -53,6 +56,11 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         recentState.value = RecentStore.read(this)
+        // 从登录页返回（或其它 WebView 页返回）时，若之前判定未登录/超时则重新探测
+        val status = wpsAccountState.value.status
+        if (status == WpsAccountStatus.LOGGED_OUT || status == WpsAccountStatus.TIMEOUT) {
+            checkWpsAccount()
+        }
     }
 
     override fun onDestroy() {
