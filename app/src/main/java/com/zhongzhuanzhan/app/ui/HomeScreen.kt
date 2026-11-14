@@ -1,9 +1,13 @@
+@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+
 package com.zhongzhuanzhan.app.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +52,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -102,6 +111,7 @@ fun HomeScreen(
                         onReopen = onReopen,
                     )
                     else -> MeScreen(
+                        config = config,
                         onReload = onReload,
                         account = account,
                         onCheckAccount = onCheckAccount,
@@ -189,6 +199,19 @@ private fun HomeTab(
     onOpenUrl: (title: String, url: String) -> Unit,
     onReopen: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val clipboard = LocalClipboardManager.current
+    val haptic = LocalHapticFeedback.current
+
+    // 长按卡片 = 把这个入口的链接复制走，方便甩到群里
+    val copyLink: (String, String) -> Unit = { title, url ->
+        if (url.isNotBlank()) {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            clipboard.setText(AnnotatedString(url))
+            Toast.makeText(context, "已复制「$title」的链接", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         GlowBackdrop()
 
@@ -207,6 +230,7 @@ private fun HomeTab(
                             onOpenUrl(config.banner.accent, config.banner.url)
                         }
                     },
+                    onLongClick = { copyLink(config.banner.title + config.banner.accent, config.banner.url) },
                 )
             }
 
@@ -226,9 +250,17 @@ private fun HomeTab(
                     key = { row -> "row_${section.title}_${row.firstOrNull()?.id ?: row.hashCode()}" },
                 ) { row ->
                     if (section.style == "compact") {
-                        CompactRow(row) { onOpenUrl(it.title, it.url) }
+                        CompactRow(
+                            row = row,
+                            onClick = { onOpenUrl(it.title, it.url) },
+                            onLongClick = { copyLink(it.title, it.url) },
+                        )
                     } else {
-                        GridRow(row) { onOpenUrl(it.title, it.url) }
+                        GridRow(
+                            row = row,
+                            onClick = { onOpenUrl(it.title, it.url) },
+                            onLongClick = { copyLink(it.title, it.url) },
+                        )
                     }
                 }
             }
@@ -266,7 +298,7 @@ private fun GlowBackdrop() {
 }
 
 @Composable
-private fun BannerCard(banner: Banner, onClick: () -> Unit) {
+private fun BannerCard(banner: Banner, onClick: () -> Unit, onLongClick: () -> Unit) {
     val shape = RoundedCornerShape(18.dp)
     Box(
         modifier = Modifier
@@ -280,7 +312,13 @@ private fun BannerCard(banner: Banner, onClick: () -> Unit) {
                     listOf(Color(0xFFE9F1FF), Color(0xFFF5F0FF), Color(0xFFFDF3FA))
                 )
             )
-            .then(if (banner.url.isNotBlank()) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(
+                if (banner.url.isNotBlank()) {
+                    Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                } else {
+                    Modifier
+                }
+            )
     ) {
         CloudArt(
             modifier = Modifier
@@ -387,7 +425,11 @@ private fun FadeLine(reverse: Boolean) {
 }
 
 @Composable
-private fun GridRow(row: List<LinkItem>, onClick: (LinkItem) -> Unit) {
+private fun GridRow(
+    row: List<LinkItem>,
+    onClick: (LinkItem) -> Unit,
+    onLongClick: (LinkItem) -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -400,6 +442,7 @@ private fun GridRow(row: List<LinkItem>, onClick: (LinkItem) -> Unit) {
                 item = item,
                 modifier = Modifier.weight(1f),
                 onClick = { onClick(item) },
+                onLongClick = { onLongClick(item) },
             )
         }
         if (row.size == 1) {
@@ -409,7 +452,12 @@ private fun GridRow(row: List<LinkItem>, onClick: (LinkItem) -> Unit) {
 }
 
 @Composable
-private fun LinkCard(item: LinkItem, modifier: Modifier, onClick: () -> Unit) {
+private fun LinkCard(
+    item: LinkItem,
+    modifier: Modifier,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
     val shape = RoundedCornerShape(16.dp)
     Row(
         modifier = modifier
@@ -418,7 +466,7 @@ private fun LinkCard(item: LinkItem, modifier: Modifier, onClick: () -> Unit) {
             .clip(shape)
             .background(Color.White)
             .border(0.5.dp, Color(0x0D000000), shape)
-            .clickable(onClick = onClick)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(start = 16.dp, end = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -459,7 +507,11 @@ private fun LinkCard(item: LinkItem, modifier: Modifier, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CompactRow(row: List<LinkItem>, onClick: (LinkItem) -> Unit) {
+private fun CompactRow(
+    row: List<LinkItem>,
+    onClick: (LinkItem) -> Unit,
+    onLongClick: (LinkItem) -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -472,6 +524,7 @@ private fun CompactRow(row: List<LinkItem>, onClick: (LinkItem) -> Unit) {
                 item = item,
                 modifier = Modifier.weight(1f),
                 onClick = { onClick(item) },
+                onLongClick = { onLongClick(item) },
             )
         }
         repeat(3 - row.size) {
@@ -481,7 +534,12 @@ private fun CompactRow(row: List<LinkItem>, onClick: (LinkItem) -> Unit) {
 }
 
 @Composable
-private fun CompactCard(item: LinkItem, modifier: Modifier, onClick: () -> Unit) {
+private fun CompactCard(
+    item: LinkItem,
+    modifier: Modifier,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
     val shape = RoundedCornerShape(14.dp)
     Column(
         modifier = modifier
@@ -489,7 +547,7 @@ private fun CompactCard(item: LinkItem, modifier: Modifier, onClick: () -> Unit)
             .shadow(8.dp, shape, ambientColor = Color(0x12000000), spotColor = Color(0x12000000))
             .clip(shape)
             .background(Color.White)
-            .clickable(onClick = onClick)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(horizontal = 12.dp, vertical = 13.dp),
     ) {
         Text(
@@ -558,7 +616,11 @@ private fun RecentBar(
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                text = if (recent != null) RecentStore.prettyHost(recent.second) else "点上面的卡片开始",
+                text = if (recent != null) {
+                    RecentStore.prettyHost(recent.second)
+                } else {
+                    "点卡片进入 · 长按可复制链接"
+                },
                 fontSize = 11.sp,
                 color = SubInk,
                 maxLines = 1,

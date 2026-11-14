@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Tag
@@ -46,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zhongzhuanzhan.app.data.AppConfig
 import com.zhongzhuanzhan.app.data.WpsAccountState
 import com.zhongzhuanzhan.app.data.WpsAccountStatus
 
@@ -54,6 +56,7 @@ private const val APP_VERSION = "1.3"
 
 @Composable
 fun MeScreen(
+    config: AppConfig,
     onReload: () -> Unit,
     account: WpsAccountState,
     onCheckAccount: () -> Unit,
@@ -62,6 +65,7 @@ fun MeScreen(
 ) {
     var showAbout by remember { mutableStateOf(false) }
     var showFeedback by remember { mutableStateOf(false) }
+    var showCheckup by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { onCheckAccount() }
 
@@ -93,6 +97,7 @@ fun MeScreen(
         item(key = "settings") {
             SettingsCard(
                 onReload = onReload,
+                onCheckup = { showCheckup = true },
                 onFeedback = { showFeedback = true },
                 onAbout = { showAbout = true },
             )
@@ -109,6 +114,13 @@ fun MeScreen(
 
     if (showFeedback) {
         FeedbackDialog(onDismiss = { showFeedback = false })
+    }
+
+    if (showCheckup) {
+        CheckupDialog(
+            items = config.sections.flatMap { it.items },
+            onDismiss = { showCheckup = false },
+        )
     }
 }
 
@@ -227,6 +239,7 @@ private fun accountMainText(account: WpsAccountState): String = when (account.st
 @Composable
 private fun SettingsCard(
     onReload: () -> Unit,
+    onCheckup: () -> Unit,
     onFeedback: () -> Unit,
     onAbout: () -> Unit,
 ) {
@@ -244,6 +257,13 @@ private fun SettingsCard(
             title = "重新载入配置",
             subtitle = "重新读取配置并刷新界面",
             onClick = onReload,
+            showDivider = true,
+        )
+        SettingRow(
+            icon = Icons.Filled.NetworkCheck,
+            title = "入口体检",
+            subtitle = "哪个入口打不开，一测便知",
+            onClick = onCheckup,
             showDivider = true,
         )
         SettingRow(
