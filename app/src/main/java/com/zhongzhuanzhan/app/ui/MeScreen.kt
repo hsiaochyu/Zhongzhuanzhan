@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -49,7 +50,7 @@ import com.zhongzhuanzhan.app.data.WpsAccountState
 import com.zhongzhuanzhan.app.data.WpsAccountStatus
 
 // 与 build.gradle.kts 的 versionName 保持一致（改版本时两处都要动）
-private const val APP_VERSION = "1.2"
+private const val APP_VERSION = "1.3"
 
 @Composable
 fun MeScreen(
@@ -60,6 +61,7 @@ fun MeScreen(
     onLoginWps: () -> Unit,
 ) {
     var showAbout by remember { mutableStateOf(false) }
+    var showFeedback by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { onCheckAccount() }
 
@@ -91,6 +93,7 @@ fun MeScreen(
         item(key = "settings") {
             SettingsCard(
                 onReload = onReload,
+                onFeedback = { showFeedback = true },
                 onAbout = { showAbout = true },
             )
         }
@@ -102,6 +105,10 @@ fun MeScreen(
 
     if (showAbout) {
         AboutDialog(onDismiss = { showAbout = false })
+    }
+
+    if (showFeedback) {
+        FeedbackDialog(onDismiss = { showFeedback = false })
     }
 }
 
@@ -218,7 +225,11 @@ private fun accountMainText(account: WpsAccountState): String = when (account.st
 }
 
 @Composable
-private fun SettingsCard(onReload: () -> Unit, onAbout: () -> Unit) {
+private fun SettingsCard(
+    onReload: () -> Unit,
+    onFeedback: () -> Unit,
+    onAbout: () -> Unit,
+) {
     val shape = RoundedCornerShape(18.dp)
     Column(
         modifier = Modifier
@@ -233,6 +244,13 @@ private fun SettingsCard(onReload: () -> Unit, onAbout: () -> Unit) {
             title = "重新载入配置",
             subtitle = "重新读取配置并刷新界面",
             onClick = onReload,
+            showDivider = true,
+        )
+        SettingRow(
+            icon = Icons.Filled.Feedback,
+            title = "反馈",
+            subtitle = "想加新入口、发现打不开、觉得哪里不好用",
+            onClick = onFeedback,
             showDivider = true,
         )
         SettingRow(
