@@ -49,7 +49,7 @@ import com.zhongzhuanzhan.app.data.WpsAccountState
 import com.zhongzhuanzhan.app.data.WpsAccountStatus
 
 // 与 build.gradle.kts 的 versionName 保持一致（改版本时两处都要动）
-private const val APP_VERSION = "1.2-beta3"
+private const val APP_VERSION = "1.2"
 
 @Composable
 fun MeScreen(
@@ -355,7 +355,7 @@ private fun VersionCard() {
         }
 
         Text(
-            text = "$APP_VERSION（测试版）",
+            text = APP_VERSION,
             fontSize = 13.sp,
             color = SubInk,
         )
