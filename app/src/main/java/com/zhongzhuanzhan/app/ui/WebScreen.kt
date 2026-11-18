@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.view.ViewGroup
+import android.webkit.CookieManager
 import android.webkit.URLUtil
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
@@ -85,6 +86,8 @@ fun WebScreen(
                 wv.destroy()
             }
             webView = null
+            // 把内存里的 cookie 落盘，否则进程被杀时会丢掉登录态
+            CookieManager.getInstance().flush()
         }
     }
 
@@ -174,6 +177,12 @@ fun WebScreen(
                             cacheMode = WebSettings.LOAD_DEFAULT
                             userAgentString = userAgentString + " ZhongZhuanZhan/1.0"
                         }
+
+                        // 登录态：接受 cookie + 允许第三方 cookie（分享页的登录回调常跨子域），
+                        // 关掉 WebView 时再 flush 落盘，避免进程被杀后掉登录
+                        val cookieManager = CookieManager.getInstance()
+                        cookieManager.setAcceptCookie(true)
+                        cookieManager.setAcceptThirdPartyCookies(this, true)
 
                         webChromeClient = object : WebChromeClient() {
                             override fun onProgressChanged(view: WebView?, newProgress: Int) {

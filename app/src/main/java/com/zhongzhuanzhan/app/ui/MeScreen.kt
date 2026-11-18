@@ -52,7 +52,7 @@ import com.zhongzhuanzhan.app.data.WpsAccountState
 import com.zhongzhuanzhan.app.data.WpsAccountStatus
 
 // 与 build.gradle.kts 的 versionName 保持一致（改版本时两处都要动）
-private const val APP_VERSION = "1.3"
+private const val APP_VERSION = "1.4"
 
 @Composable
 fun MeScreen(

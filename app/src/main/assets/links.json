@@ -1,5 +1,5 @@
 {
-  "_说明": "改这个文件即可增删入口，不用改代码。icon 可选值：portal/camera/bulb/calendar/person/forum/book/graduation/celebration/web（旧场景：car/mood/sleep/sport/study/shop/game/dance/heal/wedding/baby）",
+  "_说明": "改这个文件即可增删入口，不用改代码。icon 可选值：portal/camera/bulb/calendar/person/forum/book/graduation/celebration/blackboard/web（旧场景：car/mood/sleep/sport/study/shop/game/dance/heal/wedding/baby）",
   "appName": "中转站",
   "banner": {
     "title": "B260608",
@@ -41,6 +41,20 @@
           "url": "https://xuedazi.124.156.164.21.sslip.io/"
         },
         {
+          "id": "agent-3",
+          "title": "百事通",
+          "subtitle": "南邮校园生活智能问答助手",
+          "icon": "bulb",
+          "url": "https://comate.wpsgo.com/s/QVXRFGMPhpl6/?"
+        },
+        {
+          "id": "agent-10",
+          "title": "小黑板",
+          "subtitle": "记录日程和作业",
+          "icon": "blackboard",
+          "url": "https://class-blackboard-07962.app.workbuddy.host/?sharecode=PHUIQSUEN7"
+        },
+        {
           "id": "agent-9",
           "title": "活动管家",
           "subtitle": "AI活动方案策划",
@@ -53,13 +67,6 @@
           "subtitle": "晚自习智能考勤",
           "icon": "calendar",
           "url": "https://comate.wpsgo.com/s/aBtvyx15sO5E/?"
-        },
-        {
-          "id": "agent-3",
-          "title": "百事通",
-          "subtitle": "南邮校园生活智能问答助手",
-          "icon": "bulb",
-          "url": "https://comate.wpsgo.com/s/QVXRFGMPhpl6/?"
         },
         {
           "id": "agent-8",

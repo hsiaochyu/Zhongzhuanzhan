@@ -3,6 +3,7 @@ package com.zhongzhuanzhan.app.ui
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Cake
+import androidx.compose.material.icons.outlined.CastForEducation
 import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material.icons.outlined.ChildCare
 import androidx.compose.material.icons.outlined.DarkMode
@@ -27,7 +28,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 /**
  * JSON 里的 icon 字段 -> 图标。
  * 想加新图标：在这里加一行，然后 JSON 里写对应的 key。
- * 可选值：portal/camera/bulb/calendar/person/forum/book/graduation/celebration
+ * 可选值：portal/camera/bulb/calendar/person/forum/book/graduation/celebration/blackboard
  *        （旧场景：car/mood/sleep/sport/study/shop/game/dance/heal/wedding/baby）
  */
 object AppIcons {
@@ -43,6 +44,7 @@ object AppIcons {
         "book" -> Icons.Outlined.AutoStories          // 学搭子：翻开的书
         "graduation" -> Icons.Outlined.School         // 四六级：学士帽
         "celebration" -> Icons.Outlined.Celebration   // 活动管家：庆祝彩带
+        "blackboard" -> Icons.Outlined.CastForEducation // 小黑板：带支架的黑板
 
         // 旧场景（示例配置兼容）
         "car" -> Icons.Outlined.DirectionsCar

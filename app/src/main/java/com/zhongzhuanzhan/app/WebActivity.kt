@@ -3,6 +3,7 @@ package com.zhongzhuanzhan.app
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,6 +22,13 @@ class WebActivity : ComponentActivity() {
                 .putExtra(EXTRA_URL, url)
             context.startActivity(intent)
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // 切到后台就把 cookie 落盘：WebView 的 cookie 默认只在内存里攒着，
+        // 系统在后台杀进程时会连带丢掉，表现为「下次打开又要重新登录」
+        CookieManager.getInstance().flush()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
